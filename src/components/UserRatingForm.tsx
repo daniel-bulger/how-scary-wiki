@@ -121,7 +121,7 @@ export function UserRatingForm({ entityId }: UserRatingFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {STANDARD_DIMENSIONS.map((dimension) => (
+      {STANDARD_DIMENSIONS.map((dimension: any) => (
         <div key={dimension.id} className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="font-medium text-gray-900">

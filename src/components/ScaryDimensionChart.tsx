@@ -14,7 +14,7 @@ interface ScaryDimensionChartProps {
 
 export function ScaryDimensionChart({ dimensionScores }: ScaryDimensionChartProps) {
   const getDimensionName = (id: string) => {
-    const dimension = STANDARD_DIMENSIONS.find(d => d.id === id);
+    const dimension = STANDARD_DIMENSIONS.find((d: any) => d.id === id);
     return dimension?.name || id;
   };
 

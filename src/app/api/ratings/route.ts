@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
       count: number;
     }
     
-    const averageRatings = ratings.reduce((acc, rating) => {
+    const averageRatings = ratings.reduce((acc: any, rating: any) => {
       const dimensionId = rating.dimensionId;
       if (!acc[dimensionId]) {
         acc[dimensionId] = {
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     }, {} as Record<string, DimensionRating>);
 
     // Calculate averages
-    Object.values(averageRatings).forEach((dimension) => {
+    Object.values(averageRatings).forEach((dimension: any) => {
       dimension.average = dimension.scores!.reduce((sum: number, score: number) => sum + score, 0) / dimension.scores!.length;
       dimension.count = dimension.scores!.length;
       delete dimension.scores; // Don't send individual scores to client

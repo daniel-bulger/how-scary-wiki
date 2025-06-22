@@ -110,7 +110,7 @@ export async function GET(
     // Format the response
     const analysis = {
       whyScary: entity.analysis.whyScary,
-      dimensionScores: entity.analysis.dimensionScores.map(score => ({
+      dimensionScores: entity.analysis.dimensionScores.map((score: any) => ({
         dimensionId: score.dimension.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
         score: score.score,
         reasoning: score.reasoning
@@ -125,9 +125,9 @@ export async function GET(
 
     let userRatingsData = undefined;
     if (userRatings.length > 0) {
-      const totalScore = userRatings.reduce((sum, rating) => sum + rating.score, 0);
+      const totalScore = userRatings.reduce((sum: number, rating: any) => sum + rating.score, 0);
       const averageScore = totalScore / userRatings.length;
-      const uniqueUsers = new Set(userRatings.map(rating => rating.userId)).size;
+      const uniqueUsers = new Set(userRatings.map((rating: any) => rating.userId)).size;
       
       userRatingsData = {
         averageScore: Math.round(averageScore * 10) / 10,

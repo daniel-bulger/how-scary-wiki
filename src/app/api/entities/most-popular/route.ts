@@ -77,13 +77,13 @@ export async function GET() {
 
     // Sort by total ratings descending and take top 10
     const mostPopular = entitiesWithRatings
-      .filter(entity => entity.totalRatings > 0)
-      .sort((a, b) => b.totalRatings - a.totalRatings)
+      .filter((entity: any) => entity.totalRatings > 0)
+      .sort((a: any, b: any) => b.totalRatings - a.totalRatings)
       .slice(0, 10);
 
     return NextResponse.json({
       entities: mostPopular,
-      totalCount: entitiesWithRatings.filter(e => e.totalRatings > 0).length
+      totalCount: entitiesWithRatings.filter((e: any) => e.totalRatings > 0).length
     });
   } catch (error) {
     console.error('Failed to fetch most popular entities:', error);

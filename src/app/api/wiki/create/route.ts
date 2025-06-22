@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAIContentGenerator } from '@/services/ai-content-generator';
 import { knowledgeGraphService } from '@/services/knowledge-graph';
 import { integrationProcessor } from '@/services/integrations/processor';
+import { IntegrationResult } from '@/services/integrations/registry';
 import { prisma } from '@/lib/prisma';
 import { generateUniqueSlug } from '@/lib/slugify';
 import { adminAuth } from '@/lib/firebase-admin';
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
         // Analysis completed, return cached analysis
         const analysis = {
           whyScary: existingEntity.analysis.whyScary,
-          dimensionScores: existingEntity.analysis.dimensionScores.map(score => ({
+          dimensionScores: existingEntity.analysis.dimensionScores.map((score: any) => ({
             dimensionId: score.dimension.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
             score: score.score,
             reasoning: score.reasoning
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest) {
     console.log('Detecting relevant integrations for:', entityData.name);
     const relevantIntegrations = await aiGenerator.detectRelevantIntegrations(entityData);
     
-    console.log('AI detected integrations:', relevantIntegrations.map(i => 
+    console.log('AI detected integrations:', relevantIntegrations.map((i: IntegrationResult) => 
       `${i.integration} (${i.confidence})`
     ).join(', '));
 
@@ -228,7 +229,7 @@ export async function POST(request: NextRequest) {
       const analysis = await aiGenerator.generateScaryAnalysis(entityData);
 
       // Calculate average AI score
-      const averageScore = analysis.dimensionScores.reduce((sum, score) => sum + score.score, 0) / analysis.dimensionScores.length;
+      const averageScore = analysis.dimensionScores.reduce((sum: number, score: { score: number }) => sum + score.score, 0) / analysis.dimensionScores.length;
 
       // Update entity with analysis and clear generation flag
       const updatedEntity = await prisma.scaryEntity.update({
@@ -240,16 +241,16 @@ export async function POST(request: NextRequest) {
             create: {
               whyScary: analysis.whyScary,
               dimensionScores: {
-                create: analysis.dimensionScores.map(score => ({
+                create: analysis.dimensionScores.map((score: { dimensionId: string; score: number; reasoning: string }) => ({
                   score: score.score,
                   reasoning: score.reasoning,
                   dimension: {
                     connectOrCreate: {
-                      where: { name: score.dimensionId.split('-').map(word => 
+                      where: { name: score.dimensionId.split('-').map((word: string) => 
                         word.charAt(0).toUpperCase() + word.slice(1)
                       ).join(' ') },
                       create: {
-                        name: score.dimensionId.split('-').map(word => 
+                        name: score.dimensionId.split('-').map((word: string) => 
                           word.charAt(0).toUpperCase() + word.slice(1)
                         ).join(' '),
                         description: `Scary dimension: ${score.dimensionId}`,
