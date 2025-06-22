@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase-admin';
 import { prisma } from '@/lib/prisma';
 
+// Force dynamic rendering to ensure authentication works correctly
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -13,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.split(' ')[1];
-    const decodedToken = await adminAuth.verifyIdToken(token);
+    const decodedToken = await adminAuth().verifyIdToken(token);
     
     // Find user
     const user = await prisma.user.findUnique({

@@ -8,6 +8,9 @@ import { generateUniqueSlug } from '@/lib/slugify';
 import { adminAuth } from '@/lib/firebase-admin';
 import { checkEntityCreationLimit } from '@/lib/rate-limit';
 
+// Force dynamic rendering to ensure authentication works correctly
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     // Check authentication - REQUIRED
@@ -22,7 +25,7 @@ export async function POST(request: NextRequest) {
     let userId: string;
     try {
       const token = authHeader.split(' ')[1];
-      const decodedToken = await adminAuth.verifyIdToken(token);
+      const decodedToken = await adminAuth().verifyIdToken(token);
       userId = decodedToken.uid;
     } catch (error) {
       console.error('Auth verification failed:', error);
