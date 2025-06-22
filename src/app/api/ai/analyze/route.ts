@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       // Return cached analysis
       const analysis = {
         whyScary: existingEntity.analysis.whyScary,
-        dimensionScores: existingEntity.analysis.dimensionScores.map(score => ({
+        dimensionScores: existingEntity.analysis.dimensionScores.map((score: any) => ({
           dimensionId: score.dimension.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
           score: score.score,
           reasoning: score.reasoning
