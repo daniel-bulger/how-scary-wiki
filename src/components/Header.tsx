@@ -1,0 +1,187 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Search, Ghost, User, LogIn, LogOut, Skull, Smile, Menu, X, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { SearchDialog } from './SearchDialog';
+
+export function Header() {
+  const { user, loading } = useAuth();
+  const [showSearch, setShowSearch] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  const handleSignOut = async () => {
+    if (!auth) {
+      console.warn('Firebase not configured');
+      return;
+    }
+    
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
+  return (
+    <>
+      <header className="bg-white border-b-2 border-gray-200 sticky top-0 z-50 backdrop-blur-lg bg-white/95">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-2 md:space-x-3 group flex-shrink-0">
+              <div className="relative">
+                <Ghost className="h-8 w-8 md:h-9 md:w-9 text-orange-600 group-hover:text-orange-700 transition-colors" />
+                <div className="absolute -inset-1 bg-orange-100 rounded-full opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
+              </div>
+              <div>
+                <span className="text-lg md:text-2xl font-serif font-bold text-gray-900">How Scary</span>
+                <span className="text-xs text-gray-500 block -mt-1 hidden sm:block">Wiki</span>
+              </div>
+            </Link>
+
+            {/* Navigation and Search */}
+            <div className="flex items-center gap-2 md:gap-4 flex-1">
+              {/* Quick Nav Links - Hidden on mobile */}
+              <nav className="hidden lg:flex items-center gap-2">
+                <Link
+                  href="/scariest"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                >
+                  <Skull className="h-4 w-4" />
+                  <span>Scariest</span>
+                </Link>
+                <Link
+                  href="/least-scary"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                >
+                  <Smile className="h-4 w-4" />
+                  <span>Least Scary</span>
+                </Link>
+                <Link
+                  href="/most-popular"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  <span>Popular</span>
+                </Link>
+              </nav>
+
+              {/* Search - Mobile optimized */}
+              <div className="flex-1 max-w-xl mx-2 md:mx-4 lg:mx-auto">
+                <button
+                  onClick={() => setShowSearch(true)}
+                  className="w-full flex items-center gap-2 md:gap-3 bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-lg md:rounded-xl px-3 md:px-5 py-2 md:py-2.5 text-left transition-all hover:shadow-md group"
+                >
+                  <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400 group-hover:text-gray-600 flex-shrink-0" />
+                  <span className="text-gray-600 group-hover:text-gray-800 text-sm md:text-base truncate">Search...</span>
+                  <span className="ml-auto text-xs text-gray-400 font-medium hidden sm:inline">⌘K</span>
+                </button>
+              </div>
+            </div>
+
+            {/* User Menu and Mobile Menu Button */}
+            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <Menu className="h-6 w-6 text-gray-700" />
+              </button>
+
+              {loading ? (
+                <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+              ) : user ? (
+                <div className="flex items-center space-x-1 md:space-x-2">
+                  <div className="flex items-center space-x-1 md:space-x-2 text-sm text-gray-700">
+                    <User className="h-4 w-4" />
+                    <span className="hidden lg:inline max-w-[150px] truncate">{user.email}</span>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center space-x-1 p-2 md:px-3 md:py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span className="hidden md:inline">Sign Out</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/auth/signin"
+                  className="flex items-center gap-1 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-lg md:rounded-xl font-medium shadow-sm hover:shadow-md transition-all text-sm md:text-base"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sign In</span>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Navigation Menu */}
+      {showMobileMenu && (
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setShowMobileMenu(false)}>
+          <div 
+            className="bg-white w-64 h-full shadow-xl" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Navigation</h2>
+            </div>
+            <nav className="p-4 space-y-2">
+              <Link
+                href="/scariest"
+                onClick={() => setShowMobileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+              >
+                <Skull className="h-5 w-5" />
+                <span className="font-medium">Scariest Entities</span>
+              </Link>
+              <Link
+                href="/least-scary"
+                onClick={() => setShowMobileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+              >
+                <Smile className="h-5 w-5" />
+                <span className="font-medium">Least Scary Entities</span>
+              </Link>
+              <Link
+                href="/most-popular"
+                onClick={() => setShowMobileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+              >
+                <TrendingUp className="h-5 w-5" />
+                <span className="font-medium">Most Popular</span>
+              </Link>
+              <Link
+                href="/search"
+                onClick={() => setShowMobileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all"
+              >
+                <Search className="h-5 w-5" />
+                <span className="font-medium">Search</span>
+              </Link>
+              {!user && (
+                <Link
+                  href="/auth/signin"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all"
+                >
+                  <LogIn className="h-5 w-5" />
+                  <span className="font-medium">Sign In</span>
+                </Link>
+              )}
+            </nav>
+          </div>
+        </div>
+      )}
+
+      <SearchDialog open={showSearch} onClose={() => setShowSearch(false)} />
+    </>
+  );
+}
