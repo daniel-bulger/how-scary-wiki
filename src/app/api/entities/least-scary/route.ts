@@ -32,7 +32,7 @@ export async function GET() {
     });
 
     // Format the response
-    const formattedEntities = entities.map(entity => ({
+    const formattedEntities = entities.map((entity: any) => ({
       id: entity.id,
       googleKgId: entity.googleKgId,
       slug: entity.slug,
@@ -42,7 +42,7 @@ export async function GET() {
       entityType: entity.entityType,
       averageScore: Math.round((entity.averageAIScore || 0) * 10) / 10,
       whyScary: entity.analysis!.whyScary,
-      dimensionScores: entity.analysis!.dimensionScores.map(score => ({
+      dimensionScores: entity.analysis!.dimensionScores.map((score: any) => ({
         dimensionId: score.dimension.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
         dimensionName: score.dimension.name,
         score: score.score,

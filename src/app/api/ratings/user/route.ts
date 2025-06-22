@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const ratings = userRatings.map(rating => ({
+    const ratings = userRatings.map((rating: any) => ({
       dimensionId: rating.dimensionId,
       dimensionName: rating.dimension.name,
       score: rating.score,

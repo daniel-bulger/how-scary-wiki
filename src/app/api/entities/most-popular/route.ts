@@ -30,9 +30,9 @@ export async function GET() {
     });
 
     // Calculate ratings data for each entity
-    const entitiesWithRatings = entities.map(entity => {
+    const entitiesWithRatings = entities.map((entity: any) => {
       // Get unique users who rated this entity
-      const uniqueUserIds = new Set(entity.ratings.map(r => r.userId));
+      const uniqueUserIds = new Set(entity.ratings.map((r: any) => r.userId));
       const totalRatings = uniqueUserIds.size;
       
       // Calculate average user rating if there are ratings
@@ -40,7 +40,7 @@ export async function GET() {
       if (totalRatings > 0) {
         // Group ratings by user and average each user's ratings
         const userRatings = new Map<string, number[]>();
-        entity.ratings.forEach(rating => {
+        entity.ratings.forEach((rating: any) => {
           if (!userRatings.has(rating.userId)) {
             userRatings.set(rating.userId, []);
           }
@@ -49,7 +49,7 @@ export async function GET() {
         
         // Calculate average for each user, then overall average
         const userAverages = Array.from(userRatings.values()).map(
-          scores => scores.reduce((sum, score) => sum + score, 0) / scores.length
+          (scores: number[]) => scores.reduce((sum, score) => sum + score, 0) / scores.length
         );
         averageUserScore = userAverages.reduce((sum, avg) => sum + avg, 0) / userAverages.length;
       }
@@ -66,7 +66,7 @@ export async function GET() {
         averageUserScore: Math.round(averageUserScore * 10) / 10,
         totalRatings,
         whyScary: entity.analysis!.whyScary,
-        dimensionScores: entity.analysis!.dimensionScores.map(score => ({
+        dimensionScores: entity.analysis!.dimensionScores.map((score: any) => ({
           dimensionId: score.dimension.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
           dimensionName: score.dimension.name,
           score: score.score,

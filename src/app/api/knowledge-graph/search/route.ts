@@ -20,12 +20,12 @@ export async function GET(request: NextRequest) {
     });
 
     // Filter results to only include entities suitable for our scary wiki
-    const suitableResults = results.filter(entity => 
+    const suitableResults = results.filter((entity: any) => 
       knowledgeGraphService.isSuitableForScaryWiki(entity)
     );
 
     // Get all Google KG IDs from search results
-    const kgIds = suitableResults.map(r => r.id);
+    const kgIds = suitableResults.map((r: any) => r.id);
     
     // Look up which entities already exist in our database
     const existingEntities = await prisma.scaryEntity.findMany({
@@ -51,11 +51,11 @@ export async function GET(request: NextRequest) {
 
     // Create a map for quick lookup
     const existingMap = new Map(
-      existingEntities.map(entity => [entity.googleKgId, entity])
+      existingEntities.map((entity: any) => [entity.googleKgId, entity])
     );
 
     // Enhance search results with database info
-    const enhancedResults = suitableResults.map(result => {
+    const enhancedResults = suitableResults.map((result: any) => {
       const dbEntity = existingMap.get(result.id);
       
       if (dbEntity) {
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
         let averageAIScore = null;
         if (dbEntity.analysis && dbEntity.analysis.dimensionScores.length > 0) {
           const totalScore = dbEntity.analysis.dimensionScores.reduce(
-            (sum, score) => sum + score.score, 0
+            (sum: number, score: any) => sum + score.score, 0
           );
           averageAIScore = Math.round((totalScore / dbEntity.analysis.dimensionScores.length) * 10) / 10;
         }
@@ -72,12 +72,12 @@ export async function GET(request: NextRequest) {
         let averageUserScore = null;
         let totalRatings = 0;
         if (dbEntity.ratings.length > 0) {
-          const uniqueUsers = new Set(dbEntity.ratings.map(r => r.userId));
+          const uniqueUsers = new Set(dbEntity.ratings.map((r: any) => r.userId));
           totalRatings = uniqueUsers.size;
           
           // Group ratings by user and average
           const userRatings = new Map<string, number[]>();
-          dbEntity.ratings.forEach(rating => {
+          dbEntity.ratings.forEach((rating: any) => {
             if (!userRatings.has(rating.userId)) {
               userRatings.set(rating.userId, []);
             }
@@ -85,10 +85,10 @@ export async function GET(request: NextRequest) {
           });
           
           const userAverages = Array.from(userRatings.values()).map(
-            scores => scores.reduce((sum, score) => sum + score, 0) / scores.length
+            (scores: number[]) => scores.reduce((sum: number, score: number) => sum + score, 0) / scores.length
           );
           averageUserScore = Math.round(
-            (userAverages.reduce((sum, avg) => sum + avg, 0) / userAverages.length) * 10
+            (userAverages.reduce((sum: number, avg: number) => sum + avg, 0) / userAverages.length) * 10
           ) / 10;
         }
         
