@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     // Enhance search results with database info
     const enhancedResults = suitableResults.map((result: any) => {
-      const dbEntity = existingMap.get(result.id);
+      const dbEntity: any = existingMap.get(result.id);
       
       if (dbEntity) {
         // Calculate average AI score
