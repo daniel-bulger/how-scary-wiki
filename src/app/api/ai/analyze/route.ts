@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
 
       let userRatingsData = undefined;
       if (userRatings.length > 0) {
-        const totalScore = userRatings.reduce((sum, rating) => sum + rating.score, 0);
+        const totalScore = userRatings.reduce((sum: number, rating: any) => sum + rating.score, 0);
         const averageScore = totalScore / userRatings.length;
-        const uniqueUsers = new Set(userRatings.map(rating => rating.userId)).size;
+        const uniqueUsers = new Set(userRatings.map((rating: any) => rating.userId)).size;
         
         userRatingsData = {
           averageScore: Math.round(averageScore * 10) / 10, // Round to 1 decimal
