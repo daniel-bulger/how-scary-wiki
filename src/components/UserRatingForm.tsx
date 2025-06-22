@@ -34,7 +34,7 @@ export function UserRatingForm({ entityId }: UserRatingFormProps) {
           const data = await response.json();
           // Convert ratings array to object keyed by dimension slug
           const ratingsObject: Record<string, number> = {};
-          data.ratings.forEach((rating: any) => {
+          data.ratings.forEach((rating: { dimensionName: string; score: number }) => {
             // Convert dimension name back to slug
             const dimensionSlug = rating.dimensionName.toLowerCase().replace(/[^a-z0-9]/g, '-');
             ratingsObject[dimensionSlug] = rating.score;

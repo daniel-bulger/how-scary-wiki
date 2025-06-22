@@ -43,7 +43,7 @@ export interface ScaryAnalysis {
 
 // Google Knowledge Graph types
 export interface GoogleKgEntity {
-  '@context': any;
+  '@context': string | Record<string, unknown>;
   '@type': string;
   itemListElement?: {
     '@type': string;

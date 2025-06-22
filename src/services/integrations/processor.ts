@@ -98,7 +98,7 @@ export class IntegrationProcessor {
 
   private async processTMDB(
     entity: KnowledgeGraphResult,
-    hints: Record<string, any>
+    hints: Record<string, string | number | boolean>
   ): Promise<Partial<ProcessedIntegrationData>> {
     const tmdbService = getTMDBService();
     if (!tmdbService) {
@@ -107,7 +107,8 @@ export class IntegrationProcessor {
     }
 
     // Use hints from AI to improve search
-    const year = hints.year || this.extractYearFromDescription(entity.description);
+    const yearHint = hints.year || this.extractYearFromDescription(entity.description);
+    const year = yearHint ? String(yearHint) : undefined;
     
     console.log(`Searching TMDB for: ${entity.name}${year ? ` (${year})` : ''}`);
     const movieData = await tmdbService.findMovieByTitle(entity.name, year);
@@ -121,8 +122,8 @@ export class IntegrationProcessor {
     
     return {
       tmdbId: movieData.id,
-      posterUrl: tmdbService.getPosterUrl(movieData.poster_path),
-      backdropUrl: tmdbService.getBackdropUrl(movieData.backdrop_path),
+      posterUrl: tmdbService.getPosterUrl(movieData.poster_path) || undefined,
+      backdropUrl: tmdbService.getBackdropUrl(movieData.backdrop_path) || undefined,
       releaseDate: movieData.release_date,
       runtime: movieData.runtime,
       homepage: movieData.homepage,
@@ -139,11 +140,12 @@ export class IntegrationProcessor {
 
   private async processGoogleBooks(
     entity: KnowledgeGraphResult,
-    hints: Record<string, any>
+    hints: Record<string, string | number | boolean>
   ): Promise<Partial<ProcessedIntegrationData>> {
     try {
       // Use hints from AI to improve search
-      const author = hints.author || this.extractAuthorFromEntity(entity);
+      const authorHint = hints.author || this.extractAuthorFromEntity(entity);
+      const author = authorHint ? String(authorHint) : undefined;
       
       console.log(`Searching Google Books for: ${entity.name}${author ? ` by ${author}` : ''}`);
       const bookData = await googleBooksService.findBookByTitle(entity.name, author);
@@ -194,12 +196,12 @@ export class IntegrationProcessor {
 
   private async processMusicBrainz(
     entity: KnowledgeGraphResult,
-    hints: Record<string, any>
+    hints: Record<string, string | number | boolean>
   ): Promise<Partial<ProcessedIntegrationData>> {
     try {
       // Use hints from AI to improve search
-      const artist = hints.artist || this.extractArtistFromEntity(entity);
-      const year = hints.year || this.extractYearFromDescription(entity.description);
+      const artistHint = hints.artist || this.extractArtistFromEntity(entity);
+      const artist = artistHint ? String(artistHint) : undefined;
       
       console.log(`Searching MusicBrainz for: ${entity.name}${artist ? ` by ${artist}` : ''}`);
       const musicData = await musicBrainzService.findMusicByTitle(entity.name, artist);
@@ -257,11 +259,12 @@ export class IntegrationProcessor {
 
   private async processWikipedia(
     entity: KnowledgeGraphResult,
-    hints: Record<string, any>
+    hints: Record<string, string | number | boolean>
   ): Promise<Partial<ProcessedIntegrationData>> {
     try {
       // Use hints from AI to improve search
-      const searchQuery = hints.articleTitle || entity.name;
+      const searchQueryHint = hints.articleTitle || entity.name;
+      const searchQuery = String(searchQueryHint);
       
       console.log(`Searching Wikipedia for: ${searchQuery}`);
       const article = await wikipediaService.findArticleByTitle(searchQuery);

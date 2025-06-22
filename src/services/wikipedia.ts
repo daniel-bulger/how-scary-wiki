@@ -104,7 +104,7 @@ export class WikipediaService {
       
       if (!page?.categories) return [];
       
-      return page.categories.map((cat: any) => 
+      return page.categories.map((cat: { title: string }) => 
         cat.title.replace('Category:', '')
       );
     } catch (error) {

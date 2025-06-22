@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Ghost, Star, TrendingUp, Loader2, Calendar, Clock, ExternalLink, Film, BookOpen, User, Music, Globe, LogIn } from 'lucide-react';
+import { Ghost, Star, Loader2, Calendar, Clock, ExternalLink, Film, BookOpen, User, Music, Globe, LogIn } from 'lucide-react';
 import { ScaryDimensionChart } from '@/components/ScaryDimensionChart';
 import { UserRatingForm } from '@/components/UserRatingForm';
 
@@ -233,7 +233,7 @@ export default function WikiPage() {
           </div>
         ) : (
           <p className="text-sm text-gray-500">
-            This entity may not be suitable for scary analysis or doesn't exist in the Knowledge Graph.
+            This entity may not be suitable for scary analysis or doesn&apos;t exist in the Knowledge Graph.
           </p>
         )}
       </div>
@@ -596,7 +596,7 @@ export default function WikiPage() {
             <div className="bg-gray-50 border-b border-gray-200 px-4 md:px-6 py-3 md:py-4">
               <h2 className="text-lg md:text-xl font-serif font-bold flex items-center text-gray-900">
                 <Ghost className="h-4 w-4 md:h-5 md:w-5 mr-2 text-orange-600" />
-                Why It's Scary
+                Why It&apos;s Scary
               </h2>
             </div>
             <div className="px-4 md:px-6 py-4 md:py-6">

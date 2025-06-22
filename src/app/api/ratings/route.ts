@@ -114,6 +114,14 @@ export async function GET(request: NextRequest) {
     });
 
     // Calculate average ratings per dimension
+    interface DimensionRating {
+      dimensionId: string;
+      dimensionName: string;
+      scores?: number[];
+      average: number;
+      count: number;
+    }
+    
     const averageRatings = ratings.reduce((acc, rating) => {
       const dimensionId = rating.dimensionId;
       if (!acc[dimensionId]) {
@@ -125,14 +133,14 @@ export async function GET(request: NextRequest) {
           count: 0,
         };
       }
-      acc[dimensionId].scores.push(rating.score);
+      acc[dimensionId].scores!.push(rating.score);
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, DimensionRating>);
 
     // Calculate averages
-    Object.values(averageRatings).forEach((dimension: any) => {
-      dimension.average = dimension.scores.reduce((sum: number, score: number) => sum + score, 0) / dimension.scores.length;
-      dimension.count = dimension.scores.length;
+    Object.values(averageRatings).forEach((dimension) => {
+      dimension.average = dimension.scores!.reduce((sum: number, score: number) => sum + score, 0) / dimension.scores!.length;
+      dimension.count = dimension.scores!.length;
       delete dimension.scores; // Don't send individual scores to client
     });
 

@@ -9,7 +9,7 @@ export interface IntegrationResult {
   integration: string;
   confidence: number;
   reasoning: string;
-  hints: Record<string, any>;
+  hints: Record<string, string | number | boolean>;
 }
 
 export const INTEGRATION_REGISTRY: Record<string, IntegrationDefinition> = {
@@ -29,7 +29,7 @@ export const INTEGRATION_REGISTRY: Record<string, IntegrationDefinition> = {
     name: "MusicBrainz",
     description: "Provides album art, track listings, artist info, discography",
     entityTypes: ["music", "albums", "songs", "bands", "musicians", "horror soundtracks", "metal bands"],
-    requiredEnvVar: null // Open API, no key required
+    requiredEnvVar: undefined // Open API, no key required
   },
   igdb: {
     name: "Internet Game Database",
@@ -41,19 +41,19 @@ export const INTEGRATION_REGISTRY: Record<string, IntegrationDefinition> = {
     name: "Google Books",
     description: "Provides book covers, ISBNs, authors, publication info, editions",
     entityTypes: ["books", "novels", "literature", "authors", "horror novels", "stephen king", "gothic literature"],
-    requiredEnvVar: null // Open API
+    requiredEnvVar: undefined // Open API
   },
   wikipedia: {
     name: "Wikipedia",
     description: "Provides detailed articles, historical context, cultural significance",
     entityTypes: ["historical events", "mythological creatures", "urban legends", "cryptids", "folklore"],
-    requiredEnvVar: null // Open API
+    requiredEnvVar: undefined // Open API
   }
 };
 
 export function getAvailableIntegrations(): string[] {
   return Object.entries(INTEGRATION_REGISTRY)
-    .filter(([key, integration]) => {
+    .filter(([, integration]) => {
       // Check if required environment variable is set
       if (integration.requiredEnvVar) {
         return !!process.env[integration.requiredEnvVar];

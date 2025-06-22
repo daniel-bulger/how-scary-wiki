@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, Ghost, User, LogIn, LogOut, Skull, Smile, Menu, X, TrendingUp } from 'lucide-react';
+import { Search, Ghost, User, LogIn, LogOut, Skull, Smile, Menu, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';

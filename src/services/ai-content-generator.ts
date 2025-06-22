@@ -1,4 +1,4 @@
-import { VertexAI } from '@google-cloud/vertexai';
+import { VertexAI, GenerativeModel } from '@google-cloud/vertexai';
 import { KnowledgeGraphResult } from './knowledge-graph';
 import { STANDARD_DIMENSIONS } from '@/types';
 import { INTEGRATION_REGISTRY, IntegrationResult, getAvailableIntegrations } from './integrations/registry';
@@ -14,7 +14,7 @@ export interface ScaryAnalysisResult {
 
 export class AIContentGenerator {
   private vertexAI: VertexAI;
-  private model: any;
+  private model: GenerativeModel;
 
   constructor(projectId: string, location: string) {
     this.vertexAI = new VertexAI({
@@ -36,7 +36,13 @@ export class AIContentGenerator {
       });
 
       const response = result.response;
+      if (!response.candidates || response.candidates.length === 0) {
+        throw new Error('No response candidates from AI model');
+      }
       const text = response.candidates[0].content.parts[0].text;
+      if (!text) {
+        throw new Error('No text content in AI response');
+      }
       
       return this.parseScaryAnalysis(text);
     } catch (error) {
@@ -55,7 +61,13 @@ export class AIContentGenerator {
       });
 
       const response = result.response;
+      if (!response.candidates || response.candidates.length === 0) {
+        throw new Error('No response candidates from AI model');
+      }
       const text = response.candidates[0].content.parts[0].text;
+      if (!text) {
+        throw new Error('No text content in AI response');
+      }
       
       return this.parseIntegrationResults(text);
     } catch (error) {
@@ -133,7 +145,7 @@ Return only valid JSON, no additional text.`;
 
       // Ensure all standard dimensions are included
       const dimensionScores = STANDARD_DIMENSIONS.map(dim => {
-        const existing = parsed.dimensionScores.find((score: any) => score.dimensionId === dim.id);
+        const existing = parsed.dimensionScores.find((score: { dimensionId: string }) => score.dimensionId === dim.id);
         return existing || {
           dimensionId: dim.id,
           score: 1,
@@ -231,13 +243,13 @@ Return only the JSON array, no additional text.`;
       
       // Validate and filter results
       return parsed
-        .filter((result: any) => {
+        .filter((result: IntegrationResult) => {
           return result.integration && 
                  result.confidence >= 0.7 && 
                  result.reasoning &&
                  result.hints;
         })
-        .map((result: any) => ({
+        .map((result: IntegrationResult) => ({
           integration: result.integration,
           confidence: result.confidence,
           reasoning: result.reasoning,

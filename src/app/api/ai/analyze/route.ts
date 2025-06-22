@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAIContentGenerator } from '@/services/ai-content-generator';
-import { knowledgeGraphService } from '@/services/knowledge-graph';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { GoogleKgEntity } from '@/types';
 
 const ENTERPRISE_KG_API_BASE = 'https://enterpriseknowledgegraph.googleapis.com/v1';
 
@@ -31,7 +30,7 @@ export class KnowledgeGraphService {
 
   private async getAccessToken(): Promise<string> {
     try {
-      const { GoogleAuth } = require('google-auth-library');
+      const { GoogleAuth } = await import('google-auth-library');
       
       const auth = new GoogleAuth({
         credentials: {
@@ -75,12 +74,14 @@ export class KnowledgeGraphService {
       });
 
       return this.parseSearchResults(response.data);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Enterprise Knowledge Graph API error:', error);
-      console.error('API Response:', error.response?.data);
-      console.error('API Status:', error.response?.status);
-      
-      throw new Error(`Failed to search Enterprise Knowledge Graph: ${error.response?.data?.error?.message || error.message}`);
+      if (axios.isAxiosError(error)) {
+        console.error('API Response:', error.response?.data);
+        console.error('API Status:', error.response?.status);
+        throw new Error(`Failed to search Enterprise Knowledge Graph: ${error.response?.data?.error?.message || error.message}`);
+      }
+      throw new Error(`Failed to search Enterprise Knowledge Graph: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -106,19 +107,21 @@ export class KnowledgeGraphService {
       // Find the exact match by ID
       const exactMatch = results.find(entity => entity.id === id);
       return exactMatch || null;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Enterprise Knowledge Graph search error:', error);
-      console.error('API Response:', error.response?.data);
+      if (axios.isAxiosError(error)) {
+        console.error('API Response:', error.response?.data);
+      }
       return null;
     }
   }
 
-  private parseSearchResults(data: any): KnowledgeGraphResult[] {
+  private parseSearchResults(data: { itemListElement?: Array<{ result: any }> }): KnowledgeGraphResult[] {
     if (!data.itemListElement) {
       return [];
     }
 
-    return data.itemListElement.map((item: any) => {
+    return data.itemListElement.map((item) => {
       const result = item.result;
       
       return {

@@ -34,8 +34,8 @@ export default function SignInPage() {
         await signInWithEmailAndPassword(auth, email, password);
       }
       router.push('/');
-    } catch (error: any) {
-      setError(error.message || 'Authentication failed');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -55,8 +55,8 @@ export default function SignInPage() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       router.push('/');
-    } catch (error: any) {
-      setError(error.message || 'Google sign-in failed');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Google sign-in failed');
     } finally {
       setLoading(false);
     }

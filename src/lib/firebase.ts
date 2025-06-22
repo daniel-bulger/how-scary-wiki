@@ -1,5 +1,5 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
@@ -11,8 +11,8 @@ const firebaseConfig = {
 };
 
 // Only initialize Firebase if we have real config values
-let app;
-let auth;
+let app: FirebaseApp | null;
+let auth: Auth | null;
 
 try {
   if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY && 

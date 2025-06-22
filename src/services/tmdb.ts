@@ -36,7 +36,7 @@ export class TMDBService {
 
   async searchMovie(query: string, year?: string): Promise<TMDBSearchResult[]> {
     try {
-      const params: any = {
+      const params: Record<string, string | number> = {
         api_key: this.apiKey,
         query: query,
         language: 'en-US',

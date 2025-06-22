@@ -164,7 +164,7 @@ export default function MostPopularPage() {
             <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">No Rated Entities Yet</h2>
             <p className="text-gray-600">
-              Be the first to rate entities and they'll appear here!
+              Be the first to rate entities and they&apos;ll appear here!
             </p>
           </div>
         )}

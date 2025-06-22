@@ -226,13 +226,17 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
                             {result.name}
                           </h3>
                           {result.inDatabase ? (
-                            <Check className="h-4 w-4 text-green-500 flex-shrink-0" title="In database" />
+                            <span title="In database">
+                              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            </span>
                           ) : (
                             <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
                           )}
                         </div>
                         {result.isGenerating && (
-                          <Clock className="h-4 w-4 text-orange-500 animate-pulse" title="Generating..." />
+                          <span title="Generating...">
+                            <Clock className="h-4 w-4 text-orange-500 animate-pulse" />
+                          </span>
                         )}
                       </div>
                       <div className="mt-1 space-y-1">
@@ -268,7 +272,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
                                 <span className="font-medium text-orange-600">{result.averageAIScore}/10</span>
                               </div>
                             )}
-                            {result.totalRatings > 0 && result.averageUserScore !== null && (
+                            {result.totalRatings && result.totalRatings > 0 && result.averageUserScore !== null && (
                               <div className="flex items-center gap-1">
                                 <Star className="h-3 w-3 text-blue-500" />
                                 <span className="font-medium text-blue-600">{result.averageUserScore}/10</span>
@@ -285,7 +289,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
             </div>
           ) : query.trim() ? (
             <div className="p-4 text-center text-gray-500">
-              No scary things found matching "{query}"
+              No scary things found matching &quot;{query}&quot;
             </div>
           ) : (
             <div className="p-4 text-center text-gray-500">
