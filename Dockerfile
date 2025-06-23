@@ -63,10 +63,8 @@ COPY --from=migrator --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modu
 COPY --from=migrator --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=migrator --chown=nextjs:nodejs /app/prisma ./prisma
 
-# Create startup script
-RUN echo '#!/bin/sh\necho "Running database migrations..."\nnode node_modules/prisma/build/index.js migrate deploy\necho "Starting server..."\nnode server.js' > start.sh && \
-    chmod +x start.sh && \
-    chown nextjs:nodejs start.sh
+# Copy entrypoint script
+COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
 
 USER nextjs
 
@@ -75,4 +73,4 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["./start.sh"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
