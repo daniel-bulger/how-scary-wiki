@@ -30,7 +30,7 @@ steps:
             --task-timeout=5m \
             --max-retries=1 \
             --parallelism=1 \
-            --add-cloudsql-instances=how-scary-wiki:us-central1:how-scary-wiki \
+            --set-cloudsql-instances=how-scary-wiki:us-central1:how-scary-wiki \
             --set-secrets=DATABASE_URL=DATABASE_URL:latest \
             --command=npx \
             --args=prisma,migrate,deploy
@@ -74,7 +74,7 @@ steps:
       - '0'
       - '--max-instances'
       - '100'
-      - '--add-cloudsql-instances'
+      - '--set-cloudsql-instances'
       - 'how-scary-wiki:us-central1:how-scary-wiki'
       - '--set-env-vars'
       - 'NODE_ENV=production,GOOGLE_CLOUD_PROJECT_ID=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=us-central1'
