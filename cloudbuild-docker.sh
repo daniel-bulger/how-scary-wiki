@@ -2,6 +2,7 @@
 set -e
 
 echo "Building Docker image with Firebase configuration..."
+echo "Project ID: $PROJECT_ID"
 
 docker build \
   --build-arg "NEXT_PUBLIC_FIREBASE_API_KEY=${_FIREBASE_API_KEY}" \
@@ -10,5 +11,5 @@ docker build \
   --build-arg "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${_FIREBASE_STORAGE_BUCKET}" \
   --build-arg "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_FIREBASE_MESSAGING_SENDER_ID}" \
   --build-arg "NEXT_PUBLIC_FIREBASE_APP_ID=${_FIREBASE_APP_ID}" \
-  -t "gcr.io/${PROJECT_ID}/how-scary-wiki:latest" \
+  -t "gcr.io/$PROJECT_ID/how-scary-wiki:latest" \
   .
