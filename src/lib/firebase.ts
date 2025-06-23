@@ -21,6 +21,12 @@ try {
     auth = getAuth(app);
   } else {
     console.warn('Firebase not configured - using demo mode. Authentication will not work.');
+    console.log('Firebase config check:', {
+      hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      hasProjectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      apiKeyLength: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.length || 0,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'not set'
+    });
     app = null;
     auth = null;
   }
