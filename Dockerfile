@@ -33,6 +33,13 @@ RUN npx prisma generate
 
 RUN npm run build
 
+# Create a migration runner stage
+FROM node:22-alpine AS migrator
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY prisma ./prisma
+COPY package.json ./
+
 FROM node:22-alpine AS runner
 WORKDIR /app
 
@@ -50,6 +57,17 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy Prisma files for migrations
+COPY --from=migrator --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=migrator --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=migrator --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=migrator --chown=nextjs:nodejs /app/prisma ./prisma
+
+# Create startup script
+RUN echo '#!/bin/sh\necho "Running database migrations..."\nnode node_modules/prisma/build/index.js migrate deploy\necho "Starting server..."\nnode server.js' > start.sh && \
+    chmod +x start.sh && \
+    chown nextjs:nodejs start.sh
+
 USER nextjs
 
 EXPOSE 3000
@@ -57,4 +75,4 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["./start.sh"]
