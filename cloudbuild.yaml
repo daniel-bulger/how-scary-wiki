@@ -22,8 +22,8 @@ steps:
           gcloud run jobs update migrate-db \
             --image=gcr.io/$PROJECT_ID/how-scary-wiki:latest \
             --region=us-central1 \
-            --command=sh \
-            --args=-c,"npx prisma migrate deploy"
+            --command=node \
+            --args=node_modules/prisma/build/index.js,migrate,deploy
         else
           echo "Creating migration job..."
           gcloud run jobs create migrate-db \
@@ -34,8 +34,8 @@ steps:
             --parallelism=1 \
             --set-cloudsql-instances=how-scary-wiki:us-central1:how-scary-wiki \
             --set-secrets=DATABASE_URL=DATABASE_URL:latest \
-            --command=sh \
-            --args=-c,"npx prisma migrate deploy"
+            --command=node \
+            --args=node_modules/prisma/build/index.js,migrate,deploy
         fi
     id: 'update-migration-job'
   

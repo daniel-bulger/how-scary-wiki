@@ -70,6 +70,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/client ./nod
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
+# Create node_modules/.bin directory and link prisma
+RUN mkdir -p node_modules/.bin && \
+    ln -s ../prisma/build/index.js node_modules/.bin/prisma && \
+    chmod +x node_modules/.bin/prisma
+
 # Copy entrypoint script
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
 
