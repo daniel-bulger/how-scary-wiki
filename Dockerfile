@@ -45,6 +45,7 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV PRISMA_QUERY_ENGINE_LIBRARY /app/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -60,11 +61,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy package.json for Prisma to find it
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
 
-# Copy Prisma files for migrations and client
-COPY --from=migrator --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=migrator --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+# Copy Prisma schema and generated client from the builder stage
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
+
+# Copy Prisma CLI for migrations
 COPY --from=migrator --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=migrator --chown=nextjs:nodejs /app/prisma ./prisma
 
 # Copy entrypoint script
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
