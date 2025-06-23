@@ -66,14 +66,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
-# Copy Prisma CLI for migration job
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-
-# Create node_modules/.bin directory and link prisma
-RUN mkdir -p node_modules/.bin && \
-    ln -s ../prisma/build/index.js node_modules/.bin/prisma && \
-    chmod +x node_modules/.bin/prisma
+# Copy all node_modules for migration job (we'll optimize this later)
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Copy entrypoint script
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
