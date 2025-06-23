@@ -11,6 +11,5 @@ docker build \
   --build-arg "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${_FIREBASE_STORAGE_BUCKET}" \
   --build-arg "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_FIREBASE_MESSAGING_SENDER_ID}" \
   --build-arg "NEXT_PUBLIC_FIREBASE_APP_ID=${_FIREBASE_APP_ID}" \
-  --build-arg "DATABASE_URL=${_DATABASE_URL}" \
   -t "gcr.io/$PROJECT_ID/how-scary-wiki:latest" \
   .

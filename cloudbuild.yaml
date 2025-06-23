@@ -5,11 +5,50 @@ steps:
     args: ['./cloudbuild-docker.sh']
     env:
       - 'PROJECT_ID=$PROJECT_ID'
-    secretEnv: ['_FIREBASE_API_KEY', '_FIREBASE_AUTH_DOMAIN', '_FIREBASE_PROJECT_ID', '_FIREBASE_STORAGE_BUCKET', '_FIREBASE_MESSAGING_SENDER_ID', '_FIREBASE_APP_ID', '_DATABASE_URL']
+    secretEnv: ['_FIREBASE_API_KEY', '_FIREBASE_AUTH_DOMAIN', '_FIREBASE_PROJECT_ID', '_FIREBASE_STORAGE_BUCKET', '_FIREBASE_MESSAGING_SENDER_ID', '_FIREBASE_APP_ID']
   
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/how-scary-wiki:latest']
+  
+  # Update or create migration job
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        if gcloud run jobs describe migrate-db --region=us-central1 >/dev/null 2>&1; then
+          echo "Updating existing migration job..."
+          gcloud run jobs update migrate-db \
+            --image=gcr.io/$PROJECT_ID/how-scary-wiki:latest \
+            --region=us-central1
+        else
+          echo "Creating migration job..."
+          gcloud run jobs create migrate-db \
+            --image=gcr.io/$PROJECT_ID/how-scary-wiki:latest \
+            --region=us-central1 \
+            --task-timeout=5m \
+            --max-retries=1 \
+            --parallelism=1 \
+            --add-cloudsql-instances=how-scary-wiki:us-central1:how-scary-wiki \
+            --set-secrets=DATABASE_URL=DATABASE_URL:latest \
+            --command=npx \
+            --args=prisma,migrate,deploy
+        fi
+    id: 'update-migration-job'
+  
+  # Execute the migration job
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'jobs'
+      - 'execute'
+      - 'migrate-db'
+      - '--region'
+      - 'us-central1'
+      - '--wait'
+    waitFor: ['update-migration-job']
   
   # Deploy container image to Cloud Run with secrets
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -62,5 +101,3 @@ availableSecrets:
       env: '_FIREBASE_MESSAGING_SENDER_ID'
     - versionName: projects/$PROJECT_ID/secrets/FIREBASE_APP_ID/versions/latest
       env: '_FIREBASE_APP_ID'
-    - versionName: projects/$PROJECT_ID/secrets/DATABASE_URL/versions/latest
-      env: '_DATABASE_URL'

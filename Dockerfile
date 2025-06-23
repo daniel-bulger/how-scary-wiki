@@ -31,12 +31,6 @@ ENV NEXT_PUBLIC_FIREBASE_APP_ID=$NEXT_PUBLIC_FIREBASE_APP_ID
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build arg for database URL to run migrations at build time
-ARG DATABASE_URL
-
-# Run migrations if DATABASE_URL is provided
-RUN if [ ! -z "$DATABASE_URL" ]; then npx prisma migrate deploy; fi
-
 RUN npm run build
 
 # Create a migration runner stage
@@ -71,6 +65,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
+
+# Copy Prisma CLI for migration job
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 # Copy entrypoint script
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
