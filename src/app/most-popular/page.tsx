@@ -54,13 +54,13 @@ export default function MostPopularPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="animate-pulse">
-            <div className="h-12 bg-gray-200 rounded w-1/3 mb-8"></div>
+            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-8"></div>
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-24 bg-gray-200 rounded"></div>
+                <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
               ))}
             </div>
           </div>
@@ -71,10 +71,10 @@ export default function MostPopularPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <p className="text-red-600">Error: {error}</p>
+            <p className="text-red-600 dark:text-red-400">Error: {error}</p>
           </div>
         </div>
       </div>
@@ -82,14 +82,14 @@ export default function MostPopularPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <TrendingUp className="h-8 w-8 text-blue-600" />
-            <h1 className="text-4xl font-bold text-gray-900">Most Popular</h1>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">Most Popular</h1>
           </div>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 dark:text-gray-400">
             The most rated entities in our scary wiki, based on community engagement.
           </p>
         </div>
@@ -100,7 +100,7 @@ export default function MostPopularPage() {
             <Link
               key={entity.id}
               href={`/wiki/${entity.slug || entity.googleKgId}`}
-              className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow"
             >
               <div className="p-6">
                 <div className="flex items-start gap-6">
@@ -115,17 +115,17 @@ export default function MostPopularPage() {
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-3 mb-2">
-                          <span className="text-3xl font-bold text-gray-400">
+                          <span className="text-3xl font-bold text-gray-400 dark:text-gray-500">
                             #{index + 1}
                           </span>
-                          <h2 className="text-2xl font-bold text-gray-900">
+                          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {entity.name}
                           </h2>
-                          <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                          <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm">
                             {entity.entityType}
                           </span>
                         </div>
-                        <p className="text-gray-600 mb-3">{entity.description}</p>
+                        <p className="text-gray-600 dark:text-gray-400 mb-3">{entity.description}</p>
                         
                         {/* Ratings info */}
                         <div className="flex flex-wrap items-center gap-6 text-sm">
@@ -150,7 +150,7 @@ export default function MostPopularPage() {
                     </div>
                     
                     <div className="mt-4">
-                      <p className="text-gray-700 line-clamp-2">{entity.whyScary}</p>
+                      <p className="text-gray-700 dark:text-gray-300 line-clamp-2">{entity.whyScary}</p>
                     </div>
                   </div>
                 </div>
@@ -162,8 +162,8 @@ export default function MostPopularPage() {
         {entities.length === 0 && (
           <div className="text-center py-12">
             <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Rated Entities Yet</h2>
-            <p className="text-gray-600">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">No Rated Entities Yet</h2>
+            <p className="text-gray-600 dark:text-gray-400">
               Be the first to rate entities and they&apos;ll appear here!
             </p>
           </div>
