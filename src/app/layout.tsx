@@ -81,9 +81,9 @@ export default function RootLayout({
           <main className="container mx-auto px-4 py-6 md:py-10">
             {children}
           </main>
-          <footer className="mt-16 border-t border-gray-200 bg-white">
+          <footer className="mt-16 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             <div className="container mx-auto px-4 py-8">
-              <p className="text-center text-sm text-gray-600">
+              <p className="text-center text-sm text-gray-600 dark:text-gray-400">
                 © 2024 How Scary Wiki. Community-driven scary ratings for everything.
               </p>
             </div>

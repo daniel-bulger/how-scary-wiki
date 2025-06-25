@@ -28,18 +28,18 @@ export function Header() {
 
   return (
     <>
-      <header className="bg-white border-b-2 border-gray-200 sticky top-0 z-50 backdrop-blur-lg bg-white/95">
+      <header className="bg-white dark:bg-gray-900 border-b-2 border-gray-200 dark:border-gray-700 sticky top-0 z-50 backdrop-blur-lg bg-white/95 dark:bg-gray-900/95">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 md:space-x-3 group flex-shrink-0">
               <div className="relative">
                 <Ghost className="h-8 w-8 md:h-9 md:w-9 text-orange-600 group-hover:text-orange-700 transition-colors" />
-                <div className="absolute -inset-1 bg-orange-100 rounded-full opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
+                <div className="absolute -inset-1 bg-orange-100 dark:bg-orange-900/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
               </div>
               <div>
-                <span className="text-lg md:text-2xl font-serif font-bold text-gray-900">How Scary</span>
-                <span className="text-xs text-gray-500 block -mt-1 hidden sm:block">Wiki</span>
+                <span className="text-lg md:text-2xl font-serif font-bold text-gray-900 dark:text-gray-100">How Scary</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 block -mt-1 hidden sm:block">Wiki</span>
               </div>
             </Link>
 
@@ -49,21 +49,21 @@ export function Header() {
               <nav className="hidden lg:flex items-center gap-2">
                 <Link
                   href="/scariest"
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 >
                   <Skull className="h-4 w-4" />
                   <span>Scariest</span>
                 </Link>
                 <Link
                   href="/least-scary"
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
                 >
                   <Smile className="h-4 w-4" />
                   <span>Least Scary</span>
                 </Link>
                 <Link
                   href="/most-popular"
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
                 >
                   <TrendingUp className="h-4 w-4" />
                   <span>Popular</span>
@@ -74,11 +74,11 @@ export function Header() {
               <div className="flex-1 max-w-xl mx-2 md:mx-4 lg:mx-auto">
                 <button
                   onClick={() => setShowSearch(true)}
-                  className="w-full flex items-center gap-2 md:gap-3 bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-lg md:rounded-xl px-3 md:px-5 py-2 md:py-2.5 text-left transition-all hover:shadow-md group"
+                  className="w-full flex items-center gap-2 md:gap-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl px-3 md:px-5 py-2 md:py-2.5 text-left transition-all hover:shadow-md group"
                 >
-                  <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400 group-hover:text-gray-600 flex-shrink-0" />
-                  <span className="text-gray-600 group-hover:text-gray-800 text-sm md:text-base truncate">Search...</span>
-                  <span className="ml-auto text-xs text-gray-400 font-medium hidden sm:inline">⌘K</span>
+                  <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 flex-shrink-0" />
+                  <span className="text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 text-sm md:text-base truncate">Search...</span>
+                  <span className="ml-auto text-xs text-gray-400 dark:text-gray-500 font-medium hidden sm:inline">⌘K</span>
                 </button>
               </div>
             </div>
@@ -88,22 +88,22 @@ export function Header() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                <Menu className="h-6 w-6 text-gray-700" />
+                <Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
               </button>
 
               {loading ? (
-                <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
               ) : user ? (
                 <div className="flex items-center space-x-1 md:space-x-2">
-                  <div className="flex items-center space-x-1 md:space-x-2 text-sm text-gray-700">
+                  <div className="flex items-center space-x-1 md:space-x-2 text-sm text-gray-700 dark:text-gray-300">
                     <User className="h-4 w-4" />
                     <span className="hidden lg:inline max-w-[150px] truncate">{user.email}</span>
                   </div>
                   <button
                     onClick={handleSignOut}
-                    className="flex items-center space-x-1 p-2 md:px-3 md:py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
+                    className="flex items-center space-x-1 p-2 md:px-3 md:py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     <LogOut className="h-4 w-4" />
                     <span className="hidden md:inline">Sign Out</span>
@@ -127,11 +127,11 @@ export function Header() {
       {showMobileMenu && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setShowMobileMenu(false)}>
           <div 
-            className="bg-white w-64 h-full shadow-xl" 
+            className="bg-white dark:bg-gray-900 w-64 h-full shadow-xl" 
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Navigation</h2>
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Navigation</h2>
             </div>
             <nav className="p-4 space-y-2">
               <Link
