@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { entityAnalysisGenerator } from '@/services/entity-analysis-generator';
 
 export async function GET(
   request: NextRequest,
@@ -58,10 +59,13 @@ export async function GET(
 
     // If entity exists but analysis is not complete
     if (!entity.analysis) {
+      // Check and regenerate if needed (handles both stale and failed entities)
+      const regenerationStarted = await entityAnalysisGenerator.checkAndRegenerateIfNeeded(entity);
+      
       return NextResponse.json(
         { 
           exists: true,
-          isGenerating: entity.isGenerating,
+          isGenerating: entity.isGenerating || regenerationStarted, // Show as generating if just started
           hasAnalysis: false,
           entity: {
             id: entity.googleKgId,

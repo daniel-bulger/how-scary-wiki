@@ -62,11 +62,15 @@ interface ScaryAnalysis {
 
 interface WikiPageData {
   entity: WikiEntity;
-  analysis: ScaryAnalysis;
+  analysis?: ScaryAnalysis;
   userRatings?: {
     averageScore: number;
     totalRatings: number;
   };
+  // Optional fields for partial responses
+  exists?: boolean;
+  isGenerating?: boolean;
+  hasAnalysis?: boolean;
 }
 
 // Calculate overall AI scary score from dimension scores

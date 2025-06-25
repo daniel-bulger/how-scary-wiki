@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { generateUniqueSlug } from '@/lib/slugify';
 import { adminAuth } from '@/lib/firebase-admin';
 import { checkEntityCreationLimit } from '@/lib/rate-limit';
+import { entityAnalysisGenerator } from '@/services/entity-analysis-generator';
 
 // Force dynamic rendering to ensure authentication works correctly
 export const dynamic = 'force-dynamic';
@@ -179,6 +180,14 @@ export async function POST(request: NextRequest) {
                       entityData.detailedDescription?.match(/\b(19|20)\d{2}\b/);
     const year = yearMatch ? yearMatch[0] : undefined;
     
+    // Check if entity is suitable for scary analysis BEFORE creating it
+    if (!knowledgeGraphService.isSuitableForScaryWiki(entityData)) {
+      return NextResponse.json(
+        { error: 'Entity is not suitable for scary analysis' },
+        { status: 400, headers: rateLimitHeaders }
+      );
+    }
+    
     // Generate a unique slug for this entity
     const slug = await generateUniqueSlug(
       entityData.name, 
@@ -213,62 +222,63 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    // Check if entity is suitable for scary analysis
-    if (!knowledgeGraphService.isSuitableForScaryWiki(entityData)) {
-      // Update entity to mark generation failed
-      await prisma.scaryEntity.update({
-        where: { googleKgId: entityData.id },
-        data: { isGenerating: false }
-      });
-      
+    // Generate analysis using shared service
+    const createdEntity = await prisma.scaryEntity.findUnique({
+      where: { googleKgId: entityData.id }
+    });
+
+    if (!createdEntity) {
+      throw new Error('Failed to find created entity');
+    }
+
+    const analysisSuccessful = await entityAnalysisGenerator.generateAnalysis({
+      entityId: createdEntity.id,
+      googleKgId: createdEntity.googleKgId,
+      name: createdEntity.name,
+      description: createdEntity.description,
+      entityType: createdEntity.entityType,
+      imageUrl: createdEntity.imageUrl,
+      wikipediaExtract: createdEntity.wikipediaExtract
+    });
+
+    if (!analysisSuccessful) {
       return NextResponse.json(
         { error: 'Entity is not suitable for scary analysis' },
         { status: 400 }
       );
     }
 
-    try {
-      // Generate scary analysis using AI
-      const analysis = await aiGenerator.generateScaryAnalysis(entityData);
-
-      // Calculate average AI score
-      const averageScore = analysis.dimensionScores.reduce((sum: number, score: { score: number }) => sum + score.score, 0) / analysis.dimensionScores.length;
-
-      // Update entity with analysis and clear generation flag
-      const updatedEntity = await prisma.scaryEntity.update({
-        where: { googleKgId: entityData.id },
-        data: {
-          isGenerating: false,
-          averageAIScore: averageScore,
-          analysis: {
-            create: {
-              whyScary: analysis.whyScary,
-              dimensionScores: {
-                create: analysis.dimensionScores.map((score: { dimensionId: string; score: number; reasoning: string }) => ({
-                  score: score.score,
-                  reasoning: score.reasoning,
-                  dimension: {
-                    connectOrCreate: {
-                      where: { name: score.dimensionId.split('-').map((word: string) => 
-                        word.charAt(0).toUpperCase() + word.slice(1)
-                      ).join(' ') },
-                      create: {
-                        name: score.dimensionId.split('-').map((word: string) => 
-                          word.charAt(0).toUpperCase() + word.slice(1)
-                        ).join(' '),
-                        description: `Scary dimension: ${score.dimensionId}`,
-                        isStandard: true
-                      }
-                    }
-                  }
-                }))
+    // Fetch the updated entity with analysis
+    const updatedEntity = await prisma.scaryEntity.findUnique({
+      where: { googleKgId: entityData.id },
+      include: {
+        analysis: {
+          include: {
+            dimensionScores: {
+              include: {
+                dimension: true
               }
             }
           }
         }
-      });
+      }
+    });
 
-      return NextResponse.json({
+    if (!updatedEntity || !updatedEntity.analysis) {
+      throw new Error('Failed to generate analysis');
+    }
+
+    // Format the analysis response
+    const analysis = {
+      whyScary: updatedEntity.analysis.whyScary,
+      dimensionScores: updatedEntity.analysis.dimensionScores.map((score: any) => ({
+        dimensionId: score.dimension.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        score: score.score,
+        reasoning: score.reasoning
+      }))
+    };
+
+    return NextResponse.json({
         entity: {
           ...entityData,
           dbId: updatedEntity.id,
@@ -313,14 +323,6 @@ export async function POST(request: NextRequest) {
       }, {
         headers: rateLimitHeaders
       });
-    } catch (error) {
-      // Clear generation flag on error
-      await prisma.scaryEntity.update({
-        where: { googleKgId: entityData.id },
-        data: { isGenerating: false }
-      });
-      throw error;
-    }
   } catch (error) {
     console.error('Wiki creation error:', error);
     return NextResponse.json(
