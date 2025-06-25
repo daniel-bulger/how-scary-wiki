@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Ghost, Star, Loader2, Calendar, Clock, ExternalLink, Film, BookOpen, User, Music, Globe, LogIn } from 'lucide-react';
 import { ScaryDimensionChart } from '@/components/ScaryDimensionChart';
 import { UserRatingForm } from '@/components/UserRatingForm';
+import { WikiStructuredData } from '@/components/WikiStructuredData';
 
 interface WikiEntity {
   id: string;
@@ -252,7 +253,15 @@ export default function WikiPage() {
   const overallAIScore = analysis ? calculateOverallAIScore(analysis.dimensionScores) : null;
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <>
+      <WikiStructuredData 
+        entity={entity}
+        averageAIScore={overallAIScore}
+        averageUserScore={userRatings?.averageScore}
+        totalRatings={userRatings?.totalRatings}
+        analysis={analysis}
+      />
+      <div className="max-w-5xl mx-auto">
       {/* Wiki-style header */}
       <div className="bg-gray-50 border-b border-gray-200 -mx-4 px-4 py-6 md:py-8 mb-8">
         <div className="max-w-4xl mx-auto">
@@ -688,5 +697,6 @@ export default function WikiPage() {
 
       </div>
     </div>
+    </>
   );
 }

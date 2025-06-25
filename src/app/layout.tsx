@@ -15,8 +15,55 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "How Scary Wiki",
-  description: "The ultimate guide to rating how scary things are across multiple dimensions",
+  title: {
+    default: "How Scary - AI-Powered Scary Ratings for Movies, Books & More",
+    template: "%s | How Scary"
+  },
+  description: "Discover how scary movies, books, games, and more really are. Get AI-powered scary ratings across multiple dimensions including jump scares, gore, psychological horror, and more.",
+  keywords: [
+    "how scary",
+    "scary rating",
+    "horror rating",
+    "scary score",
+    "horror movie rating",
+    "scary book rating",
+    "fear factor",
+    "jump scare rating",
+    "gore rating",
+    "psychological horror"
+  ],
+  authors: [{ name: "How Scary" }],
+  creator: "How Scary",
+  publisher: "How Scary",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    title: "How Scary - AI-Powered Scary Ratings",
+    description: "Discover how scary movies, books, games, and more really are with our AI-powered analysis.",
+    url: "https://howscary.com",
+    siteName: "How Scary",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "How Scary - AI-Powered Scary Ratings",
+    description: "Discover how scary movies, books, games, and more really are with our AI-powered analysis.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
