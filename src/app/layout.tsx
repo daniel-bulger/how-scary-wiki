@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { Header } from "@/components/Header";
@@ -90,6 +91,9 @@ export default function RootLayout({
           </footer>
         </AuthProvider>
       </body>
+      {process.env.NODE_ENV === 'production' && (
+        <GoogleAnalytics gaId="G-WPZDH0RV9K" />
+      )}
     </html>
   );
 }
