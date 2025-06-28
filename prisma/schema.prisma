@@ -15,13 +15,22 @@ model User {
   email     String   @unique
   name      String?
   firebaseUid String @unique
+  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   ratings   ScaryRating[]
   reviews   Review[]
+  moderatorLogs ModeratorLog[]
+  editedAnalyses ScaryAnalysis[] @relation("EditedAnalyses")
 
   @@map("users")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
 }
 
 model ScaryEntity {
@@ -80,6 +89,7 @@ model ScaryEntity {
   analysis    ScaryAnalysis?
   ratings     ScaryRating[]
   reviews     Review[]
+  moderatorLogs ModeratorLog[]
 
   @@index([averageAIScore])
   @@map("scary_entities")
@@ -119,10 +129,16 @@ model ScaryRating {
 model ScaryAnalysis {
   id          String   @id @default(cuid())
   whyScary    String   @db.Text
+  whyScaryOriginal String? @db.Text // Store original AI-generated content
   generatedAt DateTime @default(now())
-
+  isHumanEdited Boolean @default(false)
+  lastEditedAt DateTime?
+  
   entityId    String   @unique
   entity      ScaryEntity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  
+  lastEditedById String?
+  lastEditedBy User? @relation("EditedAnalyses", fields: [lastEditedById], references: [id], onDelete: SetNull)
 
   dimensionScores AnalysisDimensionScore[]
 
@@ -159,4 +175,34 @@ model Review {
   user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
+}
+
+model ModeratorLog {
+  id        String   @id @default(cuid())
+  action    ModeratorAction
+  details   Json     @db.Json // Store before/after values, integration details, etc.
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  entityId  String
+  entity    ScaryEntity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([entityId])
+  @@index([action])
+  @@map("moderator_logs")
+}
+
+enum ModeratorAction {
+  EDIT_DESCRIPTION
+  EDIT_POSTER_URL
+  EDIT_AI_SUMMARY
+  TRIGGER_INTEGRATION
+  REGENERATE_ANALYSIS
+  EDIT_DIMENSION_SCORE
+  DELETE_ENTITY
+  MERGE_ENTITIES
+  EDIT_METADATA
 }

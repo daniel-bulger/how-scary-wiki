@@ -260,6 +260,72 @@ Return only the JSON array, no additional text.`;
       return [];
     }
   }
+
+  async selectBestWikipediaMatch(
+    entity: KnowledgeGraphResult,
+    candidates: Array<{ title: string; snippet: string; extract: string }>
+  ): Promise<{ title: string; reason: string } | null> {
+    const prompt = `You are helping select the best Wikipedia article match for an entity.
+
+Entity Information:
+- Name: ${entity.name}
+- Type: ${entity.types?.join(', ') || 'Unknown'}
+- Description: ${entity.description || 'No description'}
+- Detailed Description: ${entity.detailedDescription || 'None'}
+
+Wikipedia Article Candidates:
+${candidates.map((c, i) => `
+${i + 1}. Title: "${c.title}"
+   Snippet: ${c.snippet}
+   Extract: ${c.extract}
+`).join('\n')}
+
+Based on the entity information, select the Wikipedia article that best matches this specific entity.
+Consider:
+- Entity type (movie, book, music, etc.)
+- Dates mentioned in descriptions
+- Distinguishing details that differentiate similar names
+
+Return your selection as a JSON object with the exact title and your reasoning:
+{
+  "title": "exact title from above",
+  "reason": "brief explanation of why this is the best match"
+}
+
+If none of the candidates are good matches, return:
+{
+  "title": null,
+  "reason": "explanation of why none match"
+}`;
+
+    try {
+      const result = await this.model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      });
+
+      const response = result.response;
+      if (!response.candidates || response.candidates.length === 0) {
+        return null;
+      }
+      
+      const text = response.candidates[0].content.parts[0].text;
+      if (!text) {
+        return null;
+      }
+
+      // Parse the JSON response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        return null;
+      }
+
+      const selection = JSON.parse(jsonMatch[0]);
+      return selection.title ? selection : null;
+    } catch (error) {
+      console.error('Error selecting Wikipedia match:', error);
+      return null;
+    }
+  }
 }
 
 // Create a singleton instance

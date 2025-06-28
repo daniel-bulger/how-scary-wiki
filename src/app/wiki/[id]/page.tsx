@@ -7,6 +7,7 @@ import { Ghost, Star, Loader2, Calendar, Clock, ExternalLink, Film, BookOpen, Us
 import { ScaryDimensionChart } from '@/components/ScaryDimensionChart';
 import { UserRatingForm } from '@/components/UserRatingForm';
 import { WikiStructuredData } from '@/components/WikiStructuredData';
+import { ModeratorTools } from '@/components/ModeratorTools';
 
 interface WikiEntity {
   id: string;
@@ -75,8 +76,8 @@ interface WikiPageData {
 }
 
 // Calculate overall AI scary score from dimension scores
-const calculateOverallAIScore = (dimensionScores: ScaryAnalysis['dimensionScores']): number => {
-  if (dimensionScores.length === 0) return 0;
+const calculateOverallAIScore = (dimensionScores: ScaryAnalysis['dimensionScores'] | undefined): number => {
+  if (!dimensionScores || dimensionScores.length === 0) return 0;
   const totalScore = dimensionScores.reduce((sum, score) => sum + score.score, 0);
   return Math.round((totalScore / dimensionScores.length) * 10) / 10;
 };
@@ -610,6 +611,11 @@ export default function WikiPage() {
               <h2 className="text-lg md:text-xl font-serif font-bold flex items-center text-gray-900">
                 <Ghost className="h-4 w-4 md:h-5 md:w-5 mr-2 text-orange-600" />
                 Why It&apos;s Scary
+                {analysis.isHumanEdited && (
+                  <span className="ml-2 text-xs font-normal bg-orange-100 text-orange-700 px-2 py-1 rounded">
+                    Human Edited
+                  </span>
+                )}
               </h2>
             </div>
             <div className="px-4 md:px-6 py-4 md:py-6">
@@ -697,6 +703,18 @@ export default function WikiPage() {
 
       </div>
     </div>
+    
+    {/* Moderator Tools - Only shown to moderators/admins */}
+    <ModeratorTools 
+      entity={entity} 
+      analysis={analysis}
+      onEntityUpdate={(updatedEntity) => {
+        setData(prev => prev ? { ...prev, entity: { ...prev.entity, ...updatedEntity } } : null);
+      }}
+      onAnalysisUpdate={(updatedAnalysis) => {
+        setData(prev => prev ? { ...prev, analysis: updatedAnalysis } : null);
+      }}
+    />
     </>
   );
 }

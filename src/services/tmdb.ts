@@ -108,6 +108,25 @@ export class TMDBService {
   getTMDbUrl(movieId: number): string {
     return `https://www.themoviedb.org/movie/${movieId}`;
   }
+
+  async getMovieById(movieId: number): Promise<TMDbMovieData | null> {
+    try {
+      const response = await fetch(
+        `${TMDB_API_BASE}/movie/${movieId}?api_key=${this.apiKey}`
+      );
+      
+      if (!response.ok) {
+        console.error(`TMDB API error: ${response.status}`);
+        return null;
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('TMDB getMovieById error:', error);
+      return null;
+    }
+  }
 }
 
 // Create singleton instance

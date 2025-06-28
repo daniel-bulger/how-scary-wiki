@@ -12,7 +12,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "setup:dev": "./scripts/setup-env.sh development",
     "setup:prod": "./scripts/setup-env.sh production",
-    "deploy": "gcloud builds submit --config cloudbuild.yaml"
+    "deploy": "gcloud builds submit --config cloudbuild.yaml",
+    "make-admin": "tsx scripts/make-admin.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

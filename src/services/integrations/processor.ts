@@ -2,8 +2,9 @@ import { KnowledgeGraphResult } from '../knowledge-graph';
 import { getTMDBService } from '../tmdb';
 import { googleBooksService } from '../googlebooks';
 import { musicBrainzService } from '../musicbrainz';
-import { wikipediaService } from '../wikipedia';
+import { wikipediaService, WikipediaArticle } from '../wikipedia';
 import { IntegrationResult } from './registry';
+import { getAIContentGenerator } from '../ai-content-generator';
 
 export interface ProcessedIntegrationData {
   // TMDB data
@@ -106,6 +107,16 @@ export class IntegrationProcessor {
       return {};
     }
 
+    // Check if a specific TMDB ID was provided
+    if (hints.tmdbId) {
+      console.log(`Fetching TMDB movie by ID: ${hints.tmdbId}`);
+      const movieData = await tmdbService.getMovieById(Number(hints.tmdbId));
+      
+      if (movieData) {
+        return this.formatTMDBData(movieData);
+      }
+    }
+
     // Use hints from AI to improve search
     const yearHint = hints.year || this.extractYearFromDescription(entity.description);
     const year = yearHint ? String(yearHint) : undefined;
@@ -119,6 +130,13 @@ export class IntegrationProcessor {
     }
 
     console.log(`Found TMDB match: ${movieData.title} (${movieData.id})`);
+    
+    return this.formatTMDBData(movieData);
+  }
+
+  private formatTMDBData(movieData: any): Partial<ProcessedIntegrationData> {
+    const tmdbService = getTMDBService();
+    if (!tmdbService) return {};
     
     return {
       tmdbId: movieData.id,
@@ -262,33 +280,145 @@ export class IntegrationProcessor {
     hints: Record<string, string | number | boolean>
   ): Promise<Partial<ProcessedIntegrationData>> {
     try {
+      // Check if a specific Wikipedia page title was provided
+      if (hints.wikipediaTitle) {
+        console.log(`Fetching Wikipedia page by title: ${hints.wikipediaTitle}`);
+        const pageInfo = await wikipediaService.getPageInfo(String(hints.wikipediaTitle));
+        
+        if (pageInfo) {
+          const categories = await wikipediaService.getPageCategories(pageInfo.pageid);
+          const cleanExtract = wikipediaService.extractSummary(pageInfo.extract || '', 1500);
+          
+          return {
+            wikipediaPageId: pageInfo.pageid,
+            wikipediaExtract: cleanExtract,
+            wikipediaImageUrl: pageInfo.thumbnail?.source,
+            wikipediaCategories: categories,
+            wikipediaUrl: wikipediaService.getWikipediaUrl(pageInfo.title),
+          };
+        }
+      }
+      
+      // Check if a specific Wikipedia page ID was provided
+      if (hints.wikipediaPageId) {
+        console.log(`Fetching Wikipedia page by ID: ${hints.wikipediaPageId}`);
+        const pageInfo = await this.getWikipediaPageById(Number(hints.wikipediaPageId));
+        
+        if (pageInfo) {
+          const categories = await wikipediaService.getPageCategories(pageInfo.pageid);
+          const cleanExtract = wikipediaService.extractSummary(pageInfo.extract || '', 1500);
+          
+          return {
+            wikipediaPageId: pageInfo.pageid,
+            wikipediaExtract: cleanExtract,
+            wikipediaImageUrl: pageInfo.thumbnail?.source,
+            wikipediaCategories: categories,
+            wikipediaUrl: wikipediaService.getWikipediaUrl(pageInfo.title),
+          };
+        }
+      }
+      
       // Use hints from AI to improve search
       const searchQueryHint = hints.articleTitle || entity.name;
       const searchQuery = String(searchQueryHint);
       
       console.log(`Searching Wikipedia for: ${searchQuery}`);
-      const article = await wikipediaService.findArticleByTitle(searchQuery);
       
-      if (!article) {
-        console.log('No Wikipedia article found');
+      // Get multiple search results
+      const searchResults = await wikipediaService.searchArticles(searchQuery, 5);
+      
+      if (searchResults.length === 0) {
+        console.log('No Wikipedia articles found');
+        return {};
+      }
+      
+      // If we have entity context (from moderator trigger), use AI to select best match
+      let selectedArticle: WikipediaArticle | null = null;
+      
+      if (searchResults.length > 1 && entity.description) {
+        console.log(`Found ${searchResults.length} Wikipedia results, using AI to select best match...`);
+        
+        // Get page info for top results
+        const articlesWithInfo = await Promise.all(
+          searchResults.slice(0, 3).map(async (result) => {
+            const pageInfo = await wikipediaService.getPageInfo(result.title);
+            return {
+              title: result.title,
+              snippet: result.snippet,
+              extract: pageInfo?.extract?.substring(0, 200) || result.snippet
+            };
+          })
+        );
+        
+        // Use AI to select the best match
+        const aiGenerator = getAIContentGenerator();
+        const selection = await aiGenerator.selectBestWikipediaMatch(
+          entity,
+          articlesWithInfo
+        );
+        
+        if (selection && selection.title) {
+          console.log(`AI selected: ${selection.title} (reason: ${selection.reason})`);
+          selectedArticle = await wikipediaService.findArticleByTitle(selection.title);
+        }
+      }
+      
+      // Fallback to original logic if AI selection didn't work
+      if (!selectedArticle) {
+        selectedArticle = await wikipediaService.findArticleByTitle(searchQuery);
+      }
+      
+      if (!selectedArticle) {
+        console.log('No suitable Wikipedia article found');
         return {};
       }
 
-      console.log(`Found Wikipedia article: ${article.title} (${article.pageId})`);
+      console.log(`Using Wikipedia article: ${selectedArticle.title} (${selectedArticle.pageId})`);
       
-      // Extract a clean summary
-      const cleanExtract = wikipediaService.extractSummary(article.extract, 1000);
+      // Extract a clean summary (increased limit for better content)
+      const cleanExtract = wikipediaService.extractSummary(selectedArticle.extract, 1500);
       
       return {
-        wikipediaPageId: article.pageId,
+        wikipediaPageId: selectedArticle.pageId,
         wikipediaExtract: cleanExtract,
-        wikipediaImageUrl: article.imageUrl,
-        wikipediaCategories: article.categories,
-        wikipediaUrl: article.url,
+        wikipediaImageUrl: selectedArticle.imageUrl,
+        wikipediaCategories: selectedArticle.categories,
+        wikipediaUrl: selectedArticle.url,
       };
     } catch (error) {
       console.error('Error processing Wikipedia integration:', error);
       return {};
+    }
+  }
+
+  private async getWikipediaPageById(pageId: number) {
+    try {
+      const params = {
+        action: 'query',
+        format: 'json',
+        prop: 'extracts|pageimages|description|categories|pageprops',
+        pageids: pageId,
+        exintro: false,
+        explaintext: true,
+        exsectionformat: 'plain',
+        exlimit: 1,
+        exchars: 2000,
+        piprop: 'thumbnail',
+        pithumbsize: 500,
+        origin: '*'
+      };
+
+      const response = await fetch(`https://en.wikipedia.org/w/api.php?${new URLSearchParams(params)}`);
+      const data = await response.json();
+      
+      if (data.query?.pages?.[pageId]) {
+        return data.query.pages[pageId];
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching Wikipedia page by ID:', error);
+      return null;
     }
   }
 

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Ghost, User, LogIn, LogOut, Skull, Smile, Menu, TrendingUp } from 'lucide-react';
+import { Search, Ghost, User, LogIn, LogOut, Skull, Smile, Menu, TrendingUp, Shield } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -12,6 +12,31 @@ export function Header() {
   const { user, loading } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    checkAdminStatus();
+  }, [user]);
+
+  const checkAdminStatus = async () => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+    
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('/api/admin/users?limit=1', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      setIsAdmin(response.ok);
+    } catch (error) {
+      setIsAdmin(false);
+    }
+  };
 
   const handleSignOut = async () => {
     if (!auth) {
@@ -97,6 +122,15 @@ export function Header() {
                 <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
               ) : user ? (
                 <div className="flex items-center space-x-1 md:space-x-2">
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="hidden lg:flex items-center space-x-1 p-2 md:px-3 md:py-1 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin</span>
+                    </Link>
+                  )}
                   <div className="flex items-center space-x-1 md:space-x-2 text-sm text-gray-700 dark:text-gray-300">
                     <User className="h-4 w-4" />
                     <span className="hidden lg:inline max-w-[150px] truncate">{user.email}</span>
@@ -166,6 +200,16 @@ export function Header() {
                 <Search className="h-5 w-5" />
                 <span className="font-medium">Search</span>
               </Link>
+              {user && isAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all"
+                >
+                  <Shield className="h-5 w-5" />
+                  <span className="font-medium">Admin Dashboard</span>
+                </Link>
+              )}
               {!user && (
                 <Link
                   href="/auth/signin"

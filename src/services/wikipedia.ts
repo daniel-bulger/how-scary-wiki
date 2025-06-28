@@ -61,10 +61,12 @@ export class WikipediaService {
       const params = {
         action: 'query',
         format: 'json',
-        prop: 'extracts|pageimages|description|categories',
-        exintro: true,
+        prop: 'extracts|pageimages|description|categories|pageprops',
+        exintro: false, // Get full content, not just intro
         explaintext: true,
         exsectionformat: 'plain',
+        exlimit: 1,
+        exchars: 2000, // Limit extract to 2000 chars
         piprop: 'thumbnail',
         pithumbsize: 500,
         titles: title,
@@ -140,6 +142,32 @@ export class WikipediaService {
 
       // Get categories
       const categories = await this.getPageCategories(pageInfo.pageid);
+      
+      // Check if this is a disambiguation page
+      const isDisambiguation = categories.some(cat => 
+        cat.toLowerCase().includes('disambiguation')
+      ) || pageInfo.pageprops?.disambiguation !== undefined;
+      
+      // If it's a disambiguation page and we have other results, try the next one
+      if (isDisambiguation && searchResults.length > 1) {
+        console.log(`${bestMatch.title} is a disambiguation page, trying next result...`);
+        // Try the next result that's not the disambiguation page
+        for (let i = 1; i < searchResults.length; i++) {
+          const altPageInfo = await this.getPageInfo(searchResults[i].title);
+          if (altPageInfo && altPageInfo.extract && !altPageInfo.extract.includes('may refer to:')) {
+            const altCategories = await this.getPageCategories(altPageInfo.pageid);
+            return {
+              pageId: altPageInfo.pageid,
+              title: altPageInfo.title,
+              extract: altPageInfo.extract || '',
+              url: this.getWikipediaUrl(altPageInfo.title),
+              imageUrl: altPageInfo.thumbnail?.source,
+              categories: altCategories,
+              lastModified: searchResults[i].timestamp
+            };
+          }
+        }
+      }
 
       return {
         pageId: pageInfo.pageid,
@@ -163,11 +191,23 @@ export class WikipediaService {
   }
 
   // Extract a clean summary from the extract
-  extractSummary(extract: string, maxLength: number = 500): string {
+  extractSummary(extract: string, maxLength: number = 1000): string {
     if (!extract) return '';
     
     // Remove everything after "See also" or "References" sections
-    const cleanExtract = extract.split(/\n\n(See also|References|External links|Further reading)/i)[0];
+    let cleanExtract = extract.split(/\n\n(See also|References|External links|Further reading)/i)[0];
+    
+    // Remove disambiguation page content
+    if (cleanExtract.includes('may refer to:')) {
+      // For disambiguation pages, try to extract the list of options
+      const parts = cleanExtract.split('may refer to:');
+      if (parts.length > 1) {
+        cleanExtract = parts[0] + 'may refer to multiple things. Please specify which one you meant.';
+      }
+    }
+    
+    // Clean up multiple newlines
+    cleanExtract = cleanExtract.replace(/\n{3,}/g, '\n\n').trim();
     
     // If it's still too long, truncate at sentence boundary
     if (cleanExtract.length > maxLength) {
