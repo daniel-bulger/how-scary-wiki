@@ -323,6 +323,7 @@ async function handleTriggerIntegration(
     const integrationRequest = {
       integration: integration,
       confidence: 1.0, // Full confidence since it's manually triggered
+      reasoning: 'Manually triggered by moderator', // Required field
       hints: hints // Note: 'hints' not 'hint'
     };
     
