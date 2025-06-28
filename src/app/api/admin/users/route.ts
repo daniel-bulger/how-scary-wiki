@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     
     const skip = (page - 1) * limit;
     
+    const UserRole = getUserRole();
     const where = {
       ...(search ? {
         OR: [
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
           { name: { contains: search, mode: 'insensitive' as const } }
         ]
       } : {}),
-      ...(role ? { role } : {})
+      ...(role && UserRole[role as keyof typeof UserRole] ? { role: UserRole[role as keyof typeof UserRole] } : {})
     };
     
     const [users, total] = await Promise.all([

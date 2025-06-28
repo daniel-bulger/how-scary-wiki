@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,149 +8,122 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  firebaseUid String @unique
-  role      UserRole @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  ratings   ScaryRating[]
-  reviews   Review[]
-  moderatorLogs ModeratorLog[]
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  firebaseUid    String          @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  role           UserRole        @default(USER)
+  moderatorLogs  ModeratorLog[]
+  reviews        Review[]
   editedAnalyses ScaryAnalysis[] @relation("EditedAnalyses")
+  ratings        ScaryRating[]
 
   @@map("users")
 }
 
-enum UserRole {
-  USER
-  MODERATOR
-  ADMIN
-}
-
 model ScaryEntity {
-  id          String   @id @default(cuid())
-  googleKgId  String   @unique
-  slug        String   @unique
-  name        String
-  description String
-  imageUrl    String?
-  entityType  String
-  isGenerating Boolean @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Movie-specific fields from TMDB
-  tmdbId      Int?
-  posterUrl   String?
-  backdropUrl String?
-  releaseDate String?
-  runtime     Int?
-  homepage    String?
-  imdbId      String?
-  tmdbUrl     String?
-
-  // Book-specific fields from Google Books
-  googleBooksId  String?
-  bookCoverUrl   String?
-  isbn10         String?
-  isbn13         String?
-  pageCount      Int?
-  publishDate    String?
-  publishers     String[]
-  bookAuthors    String[]
-  googleBooksUrl String?
-
-  // Music-specific fields from MusicBrainz
-  musicBrainzId   String?
-  albumArtUrl     String?
-  musicArtists    String[]
-  musicReleaseDate String?
-  trackCount      Int?
-  musicType       String? // album, single, ep, recording
-  musicBrainzUrl  String?
-  lastFmUrl       String?
-
-  // Wikipedia-specific fields
-  wikipediaPageId Int?
-  wikipediaExtract String? @db.Text
-  wikipediaImageUrl String?
+  id                  String         @id @default(cuid())
+  googleKgId          String         @unique
+  name                String
+  description         String
+  imageUrl            String?
+  entityType          String
+  isGenerating        Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  tmdbId              Int?
+  posterUrl           String?
+  backdropUrl         String?
+  releaseDate         String?
+  runtime             Int?
+  homepage            String?
+  imdbId              String?
+  tmdbUrl             String?
+  bookAuthors         String[]
+  bookCoverUrl        String?
+  isbn10              String?
+  isbn13              String?
+  googleBooksId       String?
+  googleBooksUrl      String?
+  pageCount           Int?
+  publishDate         String?
+  publishers          String[]
+  musicBrainzId       String?
+  albumArtUrl         String?
+  musicArtists        String[]
+  musicReleaseDate    String?
+  trackCount          Int?
+  musicType           String?
+  musicBrainzUrl      String?
+  lastFmUrl           String?
+  averageAIScore      Float?         @default(0)
+  slug                String         @unique
+  wikipediaPageId     Int?
+  wikipediaExtract    String?
+  wikipediaImageUrl   String?
   wikipediaCategories String[]
-  wikipediaUrl    String?
-
-  // Computed score field for efficient queries
-  averageAIScore Float? @default(0)
-
-  analysis    ScaryAnalysis?
-  ratings     ScaryRating[]
-  reviews     Review[]
-  moderatorLogs ModeratorLog[]
+  wikipediaUrl        String?
+  moderatorLogs       ModeratorLog[]
+  reviews             Review[]
+  analysis            ScaryAnalysis?
+  ratings             ScaryRating[]
 
   @@index([averageAIScore])
   @@map("scary_entities")
 }
 
 model ScaryDimension {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String
-  isStandard  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  ratings           ScaryRating[]
-  analysisScores    AnalysisDimensionScore[]
+  id             String                   @id @default(cuid())
+  name           String                   @unique
+  description    String
+  isStandard     Boolean                  @default(false)
+  createdAt      DateTime                 @default(now())
+  analysisScores AnalysisDimensionScore[]
+  ratings        ScaryRating[]
 
   @@map("scary_dimensions")
 }
 
 model ScaryRating {
-  id          String   @id @default(cuid())
-  score       Int      // 1-10
-  createdAt   DateTime @default(now())
-
+  id          String         @id @default(cuid())
+  score       Int
+  createdAt   DateTime       @default(now())
   entityId    String
-  entity      ScaryEntity @relation(fields: [entityId], references: [id], onDelete: Cascade)
-  
   dimensionId String
-  dimension   ScaryDimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
-  
   userId      String
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dimension   ScaryDimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  entity      ScaryEntity    @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([entityId, dimensionId, userId])
   @@map("scary_ratings")
 }
 
 model ScaryAnalysis {
-  id          String   @id @default(cuid())
-  whyScary    String   @db.Text
-  whyScaryOriginal String? @db.Text // Store original AI-generated content
-  generatedAt DateTime @default(now())
-  isHumanEdited Boolean @default(false)
-  lastEditedAt DateTime?
-  
-  entityId    String   @unique
-  entity      ScaryEntity @relation(fields: [entityId], references: [id], onDelete: Cascade)
-  
-  lastEditedById String?
-  lastEditedBy User? @relation("EditedAnalyses", fields: [lastEditedById], references: [id], onDelete: SetNull)
-
-  dimensionScores AnalysisDimensionScore[]
+  id               String                   @id @default(cuid())
+  whyScary         String
+  generatedAt      DateTime                 @default(now())
+  entityId         String                   @unique
+  isHumanEdited    Boolean                  @default(false)
+  lastEditedAt     DateTime?
+  lastEditedById   String?
+  whyScaryOriginal String?
+  dimensionScores  AnalysisDimensionScore[]
+  entity           ScaryEntity              @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  lastEditedBy     User?                    @relation("EditedAnalyses", fields: [lastEditedById], references: [id])
 
   @@map("scary_analyses")
 }
 
 model AnalysisDimensionScore {
-  id        String @id @default(cuid())
-  score     Int    // 1-10
-  reasoning String @db.Text
-
+  id          String         @id @default(cuid())
+  score       Int
+  reasoning   String
   analysisId  String
-  analysis    ScaryAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
-  
   dimensionId String
+  analysis    ScaryAnalysis  @relation(fields: [analysisId], references: [id], onDelete: Cascade)
   dimension   ScaryDimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
 
   @@unique([analysisId, dimensionId])
@@ -163,36 +133,38 @@ model AnalysisDimensionScore {
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  content   String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id        String      @id @default(cuid())
+  content   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   entityId  String
-  entity    ScaryEntity @relation(fields: [entityId], references: [id], onDelete: Cascade)
-  
   userId    String
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entity    ScaryEntity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
 }
 
 model ModeratorLog {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   action    ModeratorAction
-  details   Json     @db.Json // Store before/after values, integration details, etc.
-  createdAt DateTime @default(now())
-
+  details   Json            @db.Json
+  createdAt DateTime        @default(now())
   userId    String
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   entityId  String
-  entity    ScaryEntity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  entity    ScaryEntity     @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([entityId])
   @@index([action])
   @@map("moderator_logs")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
 }
 
 enum ModeratorAction {
