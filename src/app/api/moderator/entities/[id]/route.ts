@@ -345,12 +345,12 @@ async function handleTriggerIntegration(
         userId: authResult.dbUser.id,
         entityId: entityId,
         action: getModeratorAction().TRIGGER_INTEGRATION,
-        details: {
+        details: JSON.parse(JSON.stringify({
           integration: integration,
           integrationData: integrationData,
           performedBy: authResult.dbUser.email,
           timestamp: new Date().toISOString()
-        }
+        }))
       }
     });
     
