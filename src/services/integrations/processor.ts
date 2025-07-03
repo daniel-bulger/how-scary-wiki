@@ -397,14 +397,14 @@ export class IntegrationProcessor {
         action: 'query',
         format: 'json',
         prop: 'extracts|pageimages|description|categories|pageprops',
-        pageids: pageId,
-        exintro: false,
-        explaintext: true,
+        pageids: String(pageId),
+        exintro: 'false',
+        explaintext: 'true',
         exsectionformat: 'plain',
-        exlimit: 1,
-        exchars: 2000,
+        exlimit: '1',
+        exchars: '2000',
         piprop: 'thumbnail',
-        pithumbsize: 500,
+        pithumbsize: '500',
         origin: '*'
       };
 

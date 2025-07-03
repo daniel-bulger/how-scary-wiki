@@ -55,6 +55,7 @@ interface WikiEntity {
 
 interface ScaryAnalysis {
   whyScary: string;
+  isHumanEdited?: boolean;
   dimensionScores: {
     dimensionId: string;
     score: number;

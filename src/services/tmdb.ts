@@ -109,7 +109,7 @@ export class TMDBService {
     return `https://www.themoviedb.org/movie/${movieId}`;
   }
 
-  async getMovieById(movieId: number): Promise<TMDbMovieData | null> {
+  async getMovieById(movieId: number): Promise<TMDBMovie | null> {
     try {
       const response = await fetch(
         `${TMDB_API_BASE}/movie/${movieId}?api_key=${this.apiKey}`

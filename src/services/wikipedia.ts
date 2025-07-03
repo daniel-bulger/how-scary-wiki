@@ -15,6 +15,10 @@ export interface WikipediaPageInfo {
   };
   description?: string;
   descriptionsource?: string;
+  pageprops?: {
+    disambiguation?: string;
+    [key: string]: any;
+  };
 }
 
 export interface WikipediaSearchResult {
